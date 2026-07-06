@@ -49,7 +49,7 @@ XPLAT_macos_arm64 = aarch64-macos
 .PHONY: build build_lib build_exe run compile_example clean asan release \
         cross-windows cross-macos cross-macos-arm64 cross-all \
         cross-windows-release cross-macos-release cross-macos-arm64-release cross-all-release \
-        compile_commands
+        compile_commands amalgamate
 
 build: build_lib build_exe
 
@@ -134,6 +134,13 @@ cross-all-release: cross-windows-release cross-macos-release cross-macos-arm64-r
 # compiler invocations. ---
 compile_commands: clean
 	bear -- $(MAKE) build CC=clang AR=ar
+
+# --- Flatten the library (everything except main.c's CLI entry point)
+# into a single .c file, inlining local headers so it can be dropped
+# straight into another project. ---
+amalgamate:
+	mkdir -p $(BUILD_ROOT)
+	python3 scripts/amalgamate.py > $(BUILD_ROOT)/rapids_amalgamated.c
 
 clean:
 	rm -rf $(BUILD_ROOT)
