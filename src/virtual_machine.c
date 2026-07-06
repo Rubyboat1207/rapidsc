@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
+#include "math.h"
 
 void func_return(VmState_t* state, Frame_t* callerFrame, Frame_t *fnFrame);
 

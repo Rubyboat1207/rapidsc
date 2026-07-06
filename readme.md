@@ -1,6 +1,6 @@
 # Rapids Embeddable Virtual Machine
 
-A reimplementation of the rapids virtual machine in C.
+A reimplementation of the [rapids virtual machine](https://github.com/Rubyboat1207/RapidsLang/tree/virtual-machine) in C with no dependancies.
 
 ## AI Disclaimer
 
@@ -9,3 +9,8 @@ The makefile was completely AI generated.
 The rapids_bytecode_parser.c file was generated completely by AI based on the original C# source files which were completely human made.
 Other small files or functions generated with ai will be annotated.
 The rest of the source code was >90% human written, with slight AI guidance for the remaining 10%
+
+## Compiling
+
+I've only ever tested on ubuntu 24.04 linux, so anything else I wouldn't consider supported officially in any capacity, but everything here should be portable to every platform, so let me know if you have issues.
+You'll want to install zig, as I use their version of clang's compiler for cross compilation, but any modern C compiler should be fine. I do not use any features past c99 though.

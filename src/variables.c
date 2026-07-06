@@ -132,6 +132,8 @@ bool var_truthy(RapidsVariable_t* var) {
     case RAPIDS_VAR_TYPE_ITERATOR: return var_iterator_completed(var);
       break;
     }
+
+    return false;
 }
 
 void var_retain(RapidsVariable_t *v) {if(v && v->refCount != -1) v->refCount++;}
@@ -154,6 +156,8 @@ char *var_as_string(RapidsVariable_t *var) {
         case RAPIDS_VAR_TYPE_ITERATOR: return NULL;
           break;
         }
+
+    return NULL;
 }
 
 char *vars_concat(RapidsVariable_t **variables, int count) {
@@ -347,6 +351,8 @@ RapidsVariable_t *var_get_iterator(RapidsVariable_t* var) {
         case RAPIDS_VAR_TYPE_NUMBER:
         return NULL;
     }
+
+    return NULL;
 }
 
 bool var_iterator_completed(RapidsVariable_t *iterator) {

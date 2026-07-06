@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     if(!has_valid_header(buffer, fileLength)) {
         // try compiling it down.
-        auto lexRes = lex((char*) buffer);
+        LexingResult_t *lexRes = lex((char*) buffer);
 
         printf("token count: %d\n", lexRes->tokens->len);
 

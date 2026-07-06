@@ -1,7 +1,7 @@
 CC      = zig cc
 AR      = zig ar
-CFLAGS  = -Wall -g -lm -fvisibility=hidden -std=c23
-RELEASE_CFLAGS = -Wall -O2 -lm -fvisibility=hidden -DNDEBUG
+CFLAGS  = -Wall -g -fvisibility=hidden
+RELEASE_CFLAGS = -Wall -O2 -fvisibility=hidden -DNDEBUG
 
 BUILD_ROOT = build
 
