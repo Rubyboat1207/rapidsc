@@ -1,0 +1,24 @@
+use console: print;
+
+isBool(item)> {
+    if(item == true) {
+        return true;
+    }else if(item == false) {
+        return 1;
+    }else {
+        return false;
+    }
+}
+
+let arr = [5, 7, 9, true, false, `Hi!`];
+
+for(item at key in arr) {
+    print(`{isBool(item)}`);
+    if(isBool(item)) {
+        print(`{key} had a boolean value! This handles seperately for some reason! {item}`);
+        continue;
+    }
+    print(`{item} at {key}`);
+}
+
+exit();

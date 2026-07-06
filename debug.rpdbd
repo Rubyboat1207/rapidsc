@@ -1,0 +1,97 @@
+RAPIDS BYTECODE
+
+VERSION: 0
+GLOBALS COUNT:1
+OUTERMOST LOCALS COUNT:5
+
+MODULES:
+console
+  print
+
+STRINGS:
+0: `Hi!`
+1: ` had a boolean value! This handles seperately for some reason! `
+2: ` at `
+
+FUNCTIONS:
+FUNC 0 - Params: 1 | Locals: 0
+0 - LoadLocal 0
+1 - LoadBool True
+2 - Equal
+3 - JumpIfFalseRel 4
+4 - LoadBool True
+5 - LoadBool True
+6 - Return
+7 - Jump 19
+8 - LoadLocal 0
+9 - LoadBool False
+10 - Equal
+11 - JumpIfFalseRel 4
+12 - LoadNumber 1
+13 - LoadBool True
+14 - Return
+15 - Jump 19
+16 - LoadBool False
+17 - LoadBool True
+18 - Return
+j7: 
+j15: 
+19 - LoadBool False
+20 - Return
+
+CODE:
+0 - LoadFunction 0
+1 - CaptureFunctionClosure
+2 - StoreLocal 0
+3 - LoadNumber 5
+4 - LoadNumber 7
+5 - LoadNumber 9
+6 - LoadBool True
+7 - LoadBool False
+8 - LoadString 0; `Hi!`
+9 - AssembleList 6
+10 - StoreLocal 1
+11 - LoadLocal 1
+12 - GetIterator
+13 - StoreLocal 4
+14 - JumpRel 2
+j43: 
+j50: 
+15 - LoadLocal 4
+16 - IteratorNext
+17 - LoadLocal 4
+18 - IteratorComplete
+19 - Not
+20 - JumpIfFalse 51
+21 - LoadLocal 4
+22 - PushIteratorValue
+23 - StoreLocal 2
+24 - LoadLocal 4
+25 - PushIteratorKey
+26 - StoreLocal 3
+27 - LoadLocal 2
+28 - LoadLocal 0
+29 - Call
+30 - Concat 1
+31 - LoadGlobal 0; print
+32 - Call
+33 - LoadLocal 2
+34 - LoadLocal 0
+35 - Call
+36 - JumpIfFalseRel 7
+37 - LoadLocal 3
+38 - LoadString 1; ` had a boolean value! This handles seperately for some reason! `
+39 - LoadLocal 2
+40 - Concat 3
+41 - LoadGlobal 0; print
+42 - Call
+43 - Jump 15
+44 - LoadLocal 2
+45 - LoadString 2; ` at `
+46 - LoadLocal 3
+47 - Concat 3
+48 - LoadGlobal 0; print
+49 - Call
+50 - Jump 15
+j20: 
+51 - Exit
