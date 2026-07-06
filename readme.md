@@ -13,4 +13,7 @@ The rest of the source code was >90% human written, with slight AI guidance for 
 ## Compiling
 
 I've only ever tested on ubuntu 24.04 linux, so anything else I wouldn't consider supported officially in any capacity, but everything here should be portable to every platform, so let me know if you have issues.
-You'll want to install zig, as I use their version of clang's compiler for cross compilation, but any modern C compiler should be fine. I do not use any features past c99 though.
+
+You'll want to install zig, as I use their version of clang's compiler for cross compilation, but any modern C compiler should be fine.
+
+Once zig is installed or you otherwise override the CC flag, feel free to run make build which will create a binary on your platform.
