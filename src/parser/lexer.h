@@ -1,4 +1,6 @@
 #include "../utils/list.h"
+#include "../utils/arena.h"
+#include <stddef.h>
 #ifndef LEXER
 #define LEXER
 
@@ -76,8 +78,8 @@ typedef struct {
 
 int tokentypePrecedence(TokenType type);
 
-Token_t *tokenNew(TokenType type, char *value, int len, int idx, int endIndex);
+Token_t *tokenNew(TokenType type, char *value, int len, int idx, int endIndex, Arena_t* arena);
 
-LexingResult_t* lex(char* code);
+LexingResult_t* lex(char* code, Arena_t* arena);
 void print_token(const Token_t *tok);
 #endif

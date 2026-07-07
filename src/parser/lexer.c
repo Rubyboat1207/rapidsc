@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include <ctype.h>
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,15 +43,15 @@ int tokentypePrecedence(TokenType type) {
     }
 }
 
-Token_t *tokenNew(TokenType type, char *value, int len, int idx, int endIndex) {
-    Token_t *token = malloc(sizeof(Token_t));
+Token_t *tokenNew(TokenType type, char *value, int len, int idx, int endIndex, Arena_t* arena) {
+    Token_t *token = arenaAllocate(arena, sizeof(Token_t), alignof(Token_t));
 
     token->endIdx = endIndex;
     token->idx = idx;
     token->type = type;
     token->len = len;
 
-    token->value = malloc(sizeof(char) * (len + 1));
+    token->value = arenaAllocate(arena, sizeof(char) * (len + 1), alignof(char));
     memcpy(token->value, value, len * sizeof(char));
     token->value[len] = '\0';
 
@@ -155,7 +156,7 @@ static TokenType symbolTokenTypes[] = {
 
 #define isNumber(c) (c >= '0' && c <= '9')
 
-LexingResult_t *lex(char *code) {
+LexingResult_t *lex(char *code, Arena_t* arena) {
     List_t *list = listNew();
 
     int i;
@@ -173,7 +174,7 @@ LexingResult_t *lex(char *code) {
                 if(isalnum(code[i+length]) || code[i+length] == '_')
                     continue;
 
-                listAppend(list, tokenNew(keywordTokenTypes[j], &code[i], length, i, i + length));
+                listAppend(list, tokenNew(keywordTokenTypes[j], &code[i], length, i, i + length, arena));
                 i += length - 1;
                 shouldContinue = true;
                 break;
@@ -207,7 +208,7 @@ LexingResult_t *lex(char *code) {
                 }
             }
 
-            listAppend(list, tokenNew(TOKENTYPE_LITERAL_NUMBER, &code[i], j, i, i+j));
+            listAppend(list, tokenNew(TOKENTYPE_LITERAL_NUMBER, &code[i], j, i, i+j, arena));
             i += j - 1;
 
             continue;
@@ -216,7 +217,7 @@ LexingResult_t *lex(char *code) {
         for(int j = 0; j < sizeof(symbolStrings) / sizeof(symbolStrings[0]); j++) {
             if(startswith(&code[i], symbolStrings[j])) {
                 int length = strlen(symbolStrings[j]);
-                listAppend(list, tokenNew(symbolTokenTypes[j], &code[i], length, i, i + length));
+                listAppend(list, tokenNew(symbolTokenTypes[j], &code[i], length, i, i + length, arena));
                 i += length - 1;
                 shouldContinue = true;
                 break;
@@ -227,7 +228,7 @@ LexingResult_t *lex(char *code) {
         }
 
         if(c == '`' || c == '"' || c == '\'') {
-            listAppend(list, tokenNew(TOKENTYPE_STRING_START, &code[i], 1, i, i+1));
+            listAppend(list, tokenNew(TOKENTYPE_STRING_START, &code[i], 1, i, i+1, arena));
 
             int contentStart = i + 1;
             int strI = 1;
@@ -252,9 +253,9 @@ LexingResult_t *lex(char *code) {
                     // Closing quote found. Emit any trailing literal content first.
                     if(strI > contentStart - i) {
                         int contentLen = (i + strI) - contentStart;
-                        listAppend(list, tokenNew(TOKENTYPE_STRING_CONTENT, &code[contentStart], contentLen, contentStart, i + strI));
+                        listAppend(list, tokenNew(TOKENTYPE_STRING_CONTENT, &code[contentStart], contentLen, contentStart, i + strI, arena));
                     }
-                    listAppend(list, tokenNew(TOKENTYPE_STRING_END, &code[i + strI], 1, i + strI, i + strI + 1));
+                    listAppend(list, tokenNew(TOKENTYPE_STRING_END, &code[i + strI], 1, i + strI, i + strI + 1, arena));
                     i = i + strI; // land on the closing quote; outer loop's i++ moves past it
                     break;
                 }
@@ -263,9 +264,9 @@ LexingResult_t *lex(char *code) {
                     // Emit literal content accumulated so far.
                     if(i + strI > contentStart) {
                         int contentLen = (i + strI) - contentStart;
-                        listAppend(list, tokenNew(TOKENTYPE_STRING_CONTENT, &code[contentStart], contentLen, contentStart, i + strI));
+                        listAppend(list, tokenNew(TOKENTYPE_STRING_CONTENT, &code[contentStart], contentLen, contentStart, i + strI, arena));
                     }
-                    listAppend(list, tokenNew(TOKENTYPE_OPEN_CURLY, &code[i + strI], 1, i + strI, i + strI + 1));
+                    listAppend(list, tokenNew(TOKENTYPE_OPEN_CURLY, &code[i + strI], 1, i + strI, i + strI + 1, arena));
 
                     // Find the matching unescaped '}', respecting nested braces.
                     int depth = 1;
@@ -289,7 +290,7 @@ LexingResult_t *lex(char *code) {
                     memcpy(exprBuf, &code[exprStart], exprLen);
                     exprBuf[exprLen] = '\0';
 
-                    LexingResult_t *subResult = lex(exprBuf);
+                    LexingResult_t *subResult = lex(exprBuf, arena);
                     for(int tokIdx = 0; tokIdx < subResult->tokens->len; tokIdx++) {
                         Token_t *tok = subResult->tokens->items[tokIdx];
                         tok->idx += i + strI + 1;
@@ -300,7 +301,7 @@ LexingResult_t *lex(char *code) {
                     free(subResult);
                     free(exprBuf);
 
-                    listAppend(list, tokenNew(TOKENTYPE_CLOSED_CURLY, &code[k], 1, k, k + 1));
+                    listAppend(list, tokenNew(TOKENTYPE_CLOSED_CURLY, &code[k], 1, k, k + 1, arena));
 
                     // Resume accumulating string content right after the closing '}'.
                     contentStart = k + 1;
@@ -317,7 +318,7 @@ LexingResult_t *lex(char *code) {
             int j;
             for(j = 1; code[i+j] != '\0' && (isalnum(code[i+j]) || code[i+j] == '_'); j++);
 
-            listAppend(list, tokenNew(TOKENTYPE_IDENTIFIER, &code[i], j, i, i+j));
+            listAppend(list, tokenNew(TOKENTYPE_IDENTIFIER, &code[i], j, i, i+j, arena));
             i += j - 1;
         }
     }

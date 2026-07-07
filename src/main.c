@@ -1,6 +1,8 @@
+#include <stdalign.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include "rapids_bytecode_parser.h"
+#include "utils/arena.h"
 #include "virtual_machine.h"
 #include "parser/lexer.h"
 
@@ -10,6 +12,19 @@ void print(Frame_t *frame) {
     free(str);
 
     pushFrameOwned(frame, var_bool(false));
+}
+
+size_t estimateArenaSize(size_t fileSizeBytes) {
+    size_t estimatedTokens = fileSizeBytes / 3.5;
+
+    size_t tokenStructBytes = estimatedTokens *
+        ((sizeof(Token_t) + alignof(Token_t) - 1) & ~(alignof(Token_t) - 1));
+
+    // Source bytes copied as string values, plus one null terminator per token
+    size_t stringBytes = fileSizeBytes + estimatedTokens;
+
+    size_t total = tokenStructBytes + stringBytes;
+    return total + total / 5; // +20% margin
 }
 
 int main(int argc, char *argv[]) {
@@ -35,13 +50,17 @@ int main(int argc, char *argv[]) {
 
     if(!has_valid_header(buffer, fileLength)) {
         // try compiling it down.
-        LexingResult_t *lexRes = lex((char*) buffer);
-
-        printf("token count: %d\n", lexRes->tokens->len);
+        int estimatedTokens = fileLength / 3.5;
+        size_t estimatedSize = estimateArenaSize(fileLength);
+        printf("%zu\n", estimatedSize);
+        Arena_t *arena = arenaNew(estimatedSize);
+        LexingResult_t *lexRes = lex((char*) buffer, arena);
 
         for(int i = 0; i < lexRes->tokens->len; i++) {
             print_token(lexRes->tokens->items[i]);
         }
+
+        printf("est token count: %d\nactual token count: %d\nallocated %zu bytes of data\nbytes of arena used: %zu, %f%%\nbytes used for file", estimatedTokens, lexRes->tokens->len, arena->arenaSize, arena->bytesUsed, ((double) arena->bytesUsed / arena->arenaSize) * 100);
 
         return 0;
     }
